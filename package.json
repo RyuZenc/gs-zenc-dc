@@ -5,9 +5,9 @@
   "engines": {
     "node": ">= 12.13 <13"
   },
-  "main": "build/src/Index.js",
+  "main": "./build/rc/Index.js",
   "bin": {
-    "coffee_bot": "build/src/Index.js"
+    "coffee_bot": "./build/src/Index.js"
   },
   "devDependencies": {
     "@types/console-stamp": "^0.2.32",
