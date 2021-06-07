@@ -5,7 +5,7 @@
   "engines": {
     "node": ">= 12.13 <13"
   },
-  "main": "./build/src/index.js",
+  "main": "build/src/index.js",
   "bin": {
     "coffee_bot": "build/src/index.js"
   },
