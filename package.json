@@ -5,7 +5,7 @@
   "engines": {
     "node": ">= 12.13 <13"
   },
-  "main": "./build/rc/Index.js",
+  "main": "./build/src/Index.js",
   "bin": {
     "coffee_bot": "./build/src/Index.js"
   },
