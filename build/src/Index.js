@@ -15,5 +15,5 @@ const client = new Client_1.default({
 });
 LoadEvents_1.default(client);
 LoadCommand_1.default(client);
-client.login(process.env.PRODUCTION === 'DEV' ? process.env.TOKEN_DEV : process.env.TOKEN);
+client.login(process.env.TOKEN);
 //# sourceMappingURL=Index.js.map
