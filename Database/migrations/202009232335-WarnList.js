@@ -29,7 +29,7 @@ module.exports = {
         allowNull: false
       },
       dateExecuted: {
-        type: 'DATETIME',
+        type: Sequelize.DATE,
         allowNull: false
       }
     })

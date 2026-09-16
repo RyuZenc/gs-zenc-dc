@@ -1,25 +1,28 @@
 import { Sequelize } from 'sequelize'
 import Path from 'path'
-import FS from 'fs'
 
+const databaseUrl = process.env.DATABASE_URL
 const storagePath = Path.join(__dirname, '../../../../Database/database.db')
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: storagePath,
-  logging: false
-})
+
+const sequelize = databaseUrl
+  ? new Sequelize(databaseUrl, {
+      logging: false,
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      }
+    })
+  : new Sequelize({
+      dialect: 'sqlite',
+      storage: storagePath,
+      logging: false
+    })
 
 const checkConnection = (): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    FS.readFile(storagePath, (err, _data) => {
-      if (err) reject(err)
-      sequelize.authenticate({ logging: false })
-        .then(() => {
-          resolve(true)
-        })
-        .catch(err => reject(err))
-    })
-  })
+  return sequelize.authenticate({ logging: false })
+    .then(() => true)
 }
 
 export { sequelize as Sequelize, checkConnection }

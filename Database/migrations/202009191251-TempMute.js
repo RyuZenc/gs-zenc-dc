@@ -21,11 +21,11 @@ module.exports = {
         allowNull: false
       },
       startTime: {
-        type: 'DATETIME',
+        type: Sequelize.DATE,
         allowNull: false
       },
       expired: {
-        type: 'DATETIME',
+        type: Sequelize.DATE,
         allowNull: false
       },
       reason: {

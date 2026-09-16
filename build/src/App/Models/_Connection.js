@@ -4,26 +4,27 @@ exports.checkConnection = exports.Sequelize = void 0;
 const tslib_1 = require("tslib");
 const sequelize_1 = require("sequelize");
 const path_1 = tslib_1.__importDefault(require("path"));
-const fs_1 = tslib_1.__importDefault(require("fs"));
+const databaseUrl = process.env.DATABASE_URL;
 const storagePath = path_1.default.join(__dirname, '../../../../Database/database.db');
-const sequelize = new sequelize_1.Sequelize({
-    dialect: 'sqlite',
-    storage: storagePath,
-    logging: false
-});
+const sequelize = databaseUrl
+    ? new sequelize_1.Sequelize(databaseUrl, {
+        logging: false,
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false
+            }
+        }
+    })
+    : new sequelize_1.Sequelize({
+        dialect: 'sqlite',
+        storage: storagePath,
+        logging: false
+    });
 exports.Sequelize = sequelize;
 const checkConnection = () => {
-    return new Promise((resolve, reject) => {
-        fs_1.default.readFile(storagePath, (err, _data) => {
-            if (err)
-                reject(err);
-            sequelize.authenticate({ logging: false })
-                .then(() => {
-                resolve(true);
-            })
-                .catch(err => reject(err));
-        });
-    });
+    return sequelize.authenticate({ logging: false })
+        .then(() => true);
 };
 exports.checkConnection = checkConnection;
 //# sourceMappingURL=_Connection.js.map

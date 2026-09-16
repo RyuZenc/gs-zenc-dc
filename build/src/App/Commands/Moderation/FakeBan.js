@@ -29,7 +29,7 @@ class FakeBan extends Command_1.default {
                     return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!');
                 }
             }
-            yield message.reply(`member tersebut berhasil diban dengan alasan:\n\`\`\`${rlReason}\`\`\``);
+            yield message.reply(`member tersebut berhasil dipalu dengan alasan:\n\`\`\`${rlReason}\`\`\``);
             setTimeout(() => {
                 message.channel.send('Tapi boong.');
             }, 3000);
