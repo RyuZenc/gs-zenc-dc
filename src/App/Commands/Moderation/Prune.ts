@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, ChannelType, PermissionFlagsBits, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { ifStaff as IfStaff } from '../../Module/Moderation/StaffList'
@@ -22,20 +22,20 @@ export default class Prune extends Command {
 
     const ifStaff = await IfStaff(executor)
     if (!ifStaff) {
-      if (!executor.hasPermission('ADMINISTRATOR')) {
+      if (!executor.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
 
     await message.delete()
-    if (message.channel.type !== 'text') return message.reply('perintah ini hanya dapat digunakan di Text Channel server.')
-    await message.channel.bulkDelete(amount)
-      .then(_channel => {
-        message.channel.send(`Berhasil menghapus pesan sebanyak ${amount} pesan.`)
-          .then(msg => setTimeout(() => msg.delete(), 3000))
-      })
-      .catch(err => {
-        message.reply(client.constant.errReason(err))
-      })
+    const channel = message.channel as TextChannel
+    if (channel.type !== ChannelType.GuildText) return message.reply('perintah ini hanya dapat digunakan di Text Channel server.')
+    try {
+      await channel.bulkDelete(amount)
+      const feedback = await channel.send(`Berhasil menghapus pesan sebanyak ${amount} pesan.`)
+      setTimeout(() => feedback.delete().catch(() => undefined), 3000)
+    } catch (error) {
+      channel.send(client.constant.errReason(error)).catch(() => undefined)
+    }
   }
 }

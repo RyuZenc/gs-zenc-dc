@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { IMenu } from '../../../@Types/Moderation/Punishment'
@@ -50,10 +50,10 @@ export default class PunishmentList extends Command {
   public async run(client: Client, message: Message, args: string[]): Promise<any> {
     const plMenu = args[0]
     const categoryMenu = Object.keys(this.menu)
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor(client.config.botColor)
       .setTimestamp()
-      .setFooter(`Diminta oleh ${message.author.tag}`, message.author.displayAvatarURL())
+      .setFooter({ text: `Diminta oleh ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
       .setThumbnail(client.user.displayAvatarURL())
 
     if (!plMenu) {
@@ -62,7 +62,7 @@ export default class PunishmentList extends Command {
         .setDescription(
           `Librari ini berisi bagaimana efek dari sebuah hukuman di server ini, silahkan memilih menu di bawah ini dengan cara \`${client.config.botPrefix}${this.options.name as string} [menu]\`.`
         )
-        .addField('Menu', `\`${categoryMenu.join('`, `')}\``, false)
+        .addFields([{ name: 'Menu', value: `\`${categoryMenu.join('`, `')}\``, inline: false }])
     } else {
       const menu = plMenu.toLowerCase()
       if (!categoryMenu.includes(menu)) return message.reply('menu tidak valid.')
@@ -71,10 +71,12 @@ export default class PunishmentList extends Command {
       embed
         .setTitle(`Deskripsi hukuman untuk ${menu}`)
         .setDescription(list.description)
-        .addField('Mengapa kamu mendapatkannya', list.whyGetPunishment, false)
-        .addField('Hitungannya', list.counting.map(c => `Ke-${c.counter}: ${c.fallback}`).join('\n'), false)
+        .addFields([
+          { name: 'Mengapa kamu mendapatkannya', value: list.whyGetPunishment, inline: false },
+          { name: 'Hitungannya', value: list.counting.map(c => `Ke-${c.counter}: ${c.fallback}`).join('\n'), inline: false }
+        ])
     }
 
-    message.channel.send(`<@!${message.author.id}>`, { embed })
+    await (message.channel as TextChannel).send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

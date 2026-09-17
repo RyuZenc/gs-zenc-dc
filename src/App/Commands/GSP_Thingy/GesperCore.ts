@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, PermissionFlagsBits, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Moment from 'moment'
@@ -20,17 +20,18 @@ export default class GesperCore extends Command {
   }
 
   async startGesperCore (client: Client, message: Message): Promise<any> {
-    await message.channel.send(
+    const channel = message.channel as TextChannel
+    await channel.send(
       `Penanggung jawab kali ini adalah <@!${message.author.id}>\nKetik \`cancel\` apabila ingin membatalkan konfigurasi ini.`
     )
     
-    const embedBuilder = new MessageEmbed()
+    const embedBuilder = new EmbedBuilder()
       .setColor(client.config.botColor)
       .setTitle('Konfigurasi GESPER')
       .setDescription('Sebutkan channel yang ingin kamu gunakan untuk GESPER kali ini!')
 
     try {
-      const messageDominator = await message.channel.send(embedBuilder)
+      const messageDominator = await channel.send({ embeds: [embedBuilder] })
       const config = {
         channelID: '',
         serverID: '',
@@ -41,20 +42,18 @@ export default class GesperCore extends Command {
       /**
        * Tanya channelnya di mana
        */
-      await message.channel.awaitMessages(
-        (m: Message) => {
+      await channel.awaitMessages({
+        filter: (m: Message) => {
           return (
               m.content.toLowerCase() === 'cancel' || (m.content.startsWith('<#') && m.content.endsWith('>'))
               || message.guild.channels.cache.has(m.content)
             ) 
             && m.author.id === message.author.id
         },
-        {
-          time: 30000,
-          max: 1,
-          errors: ['time']
-        }
-      )
+        time: 30000,
+        max: 1,
+        errors: ['time']
+      })
         .then(async collected => {
           const data = collected.first()
           await data.delete()
@@ -66,15 +65,15 @@ export default class GesperCore extends Command {
           console.log(config)
         })
         .catch(_err => {
-          message.channel.send('Waktu habis!')
+          channel.send('Waktu habis!')
         })
       if (config.break) {
         embedBuilder.setDescription('Konfigurasi dibatalkan')
-        await messageDominator.edit(embedBuilder)
+        await messageDominator.edit({ embeds: [embedBuilder] })
         return undefined
       }
       embedBuilder.setDescription('Sedang mengambil beberapa plugin...')
-      await messageDominator.edit(embedBuilder)
+      await messageDominator.edit({ embeds: [embedBuilder] })
 
       /**
        * Reserved for loading all automatic module here
@@ -86,7 +85,7 @@ export default class GesperCore extends Command {
         Silahkan menggunakan \`${client.config.botPrefix}gesper stop\` untuk menghentikan acara.
         `
       )
-      await messageDominator.edit(embedBuilder)
+      await messageDominator.edit({ embeds: [embedBuilder] })
 
       // Preconfig in here
       client.state.gesper.started = true
@@ -102,13 +101,13 @@ export default class GesperCore extends Command {
   public async run(client: Client, message: Message, args: string[]): Promise<any> {
     const executor = await message.guild.members.fetch(message.author.id)
     if (!await ifEventCommitee(executor) || !await ifStaff(executor)) {
-      if (!executor.hasPermission('ADMINISTRATOR')) return message.reply(
+      if (!executor.permissions.has(PermissionFlagsBits.Administrator)) return message.reply(
         'hanya EVENT COMMITEE yang berhak untuk mengeksekusi command ini!'
       )
     }
 
     if (args.length === 0) {
-      if (client.state.gesper.started) return message.channel.send(
+      if (client.state.gesper.started) return (message.channel as TextChannel).send(
         `GESPER sudah dimulai di <#${client.state.gesper.channelID}> oleh <@!${client.state.gesper.personInCharge}>.`
       )
       else {

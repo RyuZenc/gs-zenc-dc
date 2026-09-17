@@ -16,7 +16,7 @@ import RegisterRole from '../Models/RegisterRole'
 
 export default class DatabaseToState extends Events {
   constructor() {
-    super('ready')
+    super('clientReady')
   }
 
   public async run(client: Client): Promise<any> {

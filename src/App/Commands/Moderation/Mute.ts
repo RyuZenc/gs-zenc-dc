@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { ifStaff as IfStaff } from '../../Module/Moderation/StaffList'
@@ -25,7 +25,7 @@ export default class Mute extends Command {
 
     const ifStaff = await IfStaff(momod)
     if (!ifStaff) {
-      if (!momod.hasPermission('ADMINISTRATOR')) {
+      if (!momod.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
@@ -33,12 +33,11 @@ export default class Mute extends Command {
     const mutedRole = message.guild.roles.cache.filter(r => r.name === 'Muted').first()
     if (!mutedRole) return message.reply('tidak ada role yang bernama **Muted**.')
 
-    await member.roles.add(mutedRole)
-      .then(mem => {
-        message.reply(`<@!${mem.id}> berhasil dibungkam dengan alasan:\`\`\`${rlReason}\`\`\``)
-      })
-      .catch(err => {
-        message.reply(client.constant.errReason(err))
-      })
+    try {
+      await member.roles.add(mutedRole)
+      await message.reply(`<@!${member.id}> berhasil dibungkam dengan alasan:\`\`\`${rlReason}\`\`\``)
+    } catch (error) {
+      message.reply(client.constant.errReason(error))
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Message, MessageEmbed, PresenceStatus } from 'discord.js'
+import { Message, EmbedBuilder, PresenceStatus, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Moment from 'moment'
@@ -16,22 +16,22 @@ export default class UserInfo extends Command {
   }
 
   private setColorPresence(presence: PresenceStatus) {
-    const ret = { color: '', pretty: '' }
+    const ret = { color: 0, pretty: '' }
     switch (presence) {
       case 'online':
-        ret.color = '0x00ff00'
+        ret.color = 0x00ff00
         ret.pretty = 'Online'
         break
       case 'offline':
-        ret.color = '0x858585'
+        ret.color = 0x858585
         ret.pretty = 'Offline'
         break
       case 'idle':
-        ret.color = '0xffff00'
+        ret.color = 0xffff00
         ret.pretty = 'AFK'
         break
       case 'dnd':
-        ret.color = '0xff0000'
+        ret.color = 0xff0000
         ret.pretty = 'Sibuk'
         break
     }
@@ -44,12 +44,13 @@ export default class UserInfo extends Command {
     const member = message.guild.members.cache.get(user.id)
     if (!member) return message.reply('member tidak ditemukan!')
 
-    const embed = new MessageEmbed()
-      .setColor(this.setColorPresence(member.user.presence.status).color)
+    const presenceStatus = member.presence ? member.presence.status : 'offline'
+    const embed = new EmbedBuilder()
+      .setColor(this.setColorPresence(presenceStatus).color)
       .setTimestamp()
-      .setFooter(`Direquest oleh ${message.author.tag}`, client.user.displayAvatarURL())
+      .setFooter({ text: `Direquest oleh ${message.author.username}`, iconURL: client.user.displayAvatarURL() })
       .setThumbnail(member.user.displayAvatarURL())
-      .setTitle(`${member.user.tag} [${member.id}]`)
+      .setTitle(`${member.user.username} [${member.id}]`)
       .addFields([
         {
           name: 'Panggilan',
@@ -58,8 +59,8 @@ export default class UserInfo extends Command {
         },
         {
           name: 'Status',
-          value: `${this.setColorPresence(member.user.presence.status).pretty}` +
-            `${typeof member.voice.channelID === 'undefined' ? '' : ` (Sedang ngobrol di ${!member.voice.channel ? 'server lain.' : member.voice.channel.name})`}`,
+          value: `${this.setColorPresence(presenceStatus).pretty}` +
+            `${!member.voice.channelId ? '' : ` (Sedang ngobrol di ${!member.voice.channel ? 'server lain.' : member.voice.channel.name})`}`,
           inline: true
         },
         {
@@ -79,6 +80,7 @@ export default class UserInfo extends Command {
         }
       ])
 
-    message.channel.send(`<@!${message.author.id}>`, { embed })
+    const channel = message.channel as TextChannel
+    channel.send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

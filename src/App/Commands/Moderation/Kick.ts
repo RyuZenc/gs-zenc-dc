@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { ifStaff as IfStaff } from '../../Module/Moderation/StaffList'
@@ -25,28 +25,24 @@ export default class Kick extends Command {
 
     const ifStaff = await IfStaff(momod)
     if (!ifStaff) {
-      if (!momod.hasPermission('ADMINISTRATOR')) {
+      if (!momod.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
 
     const ifMemberStaff = await IfStaff(member)
-    if (ifMemberStaff || member.hasPermission('ADMINISTRATOR')) return message.reply('anda tidak bisa menendang staff.')
+    if (ifMemberStaff || member.permissions.has(PermissionFlagsBits.Administrator)) return message.reply('anda tidak bisa menendang staff.')
 
-    await member.createDM()
-      .then(memberCH => {
-        memberCH.send(`Anda telah ditendang dari ${message.guild.name} dengan alasan:\n\`\`\`${reason}\`\`\``)
-      })
+    await member.send(`Anda telah ditendang dari ${message.guild.name} dengan alasan:\n\`\`\`${reason}\`\`\``)
       .catch(_err => {
         // Do fucking nothing
       })
 
-    await member.kick(`${rlReason} | ${message.author.tag}`)
-      .then(() => {
-        message.reply(`member tersebut berhasil ditendang dengan alasan:\n\`\`\`${rlReason}\`\`\``)
-      })
-      .catch(err => {
-        message.reply(client.constant.errReason(err))
-      })
+    try {
+      await member.kick(`${rlReason} | ${message.author.username}`)
+      await message.reply(`member tersebut berhasil ditendang dengan alasan:\n\`\`\`${rlReason}\`\`\``)
+    } catch (error) {
+      message.reply(client.constant.errReason(error))
+    }
   }
 }

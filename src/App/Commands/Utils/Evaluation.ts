@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Util from 'util'
@@ -28,10 +28,10 @@ export default class Evaluation extends Command {
         ev = Util.inspect(ev, { depth: 0 })
       }
 
-      message.channel.send(`\`\`\`${ev}\`\`\``)
+      (message.channel as TextChannel).send(`\`\`\`${ev}\`\`\``)
     } catch (error) {
-      console.error(error)
-      message.channel.send(error.message)
+      console.error(error);
+      (message.channel as TextChannel).send(error instanceof Error ? error.message : String(error))
     }
   }
 }

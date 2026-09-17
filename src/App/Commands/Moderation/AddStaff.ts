@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import MStaffList from '../../Models/StaffList'
@@ -25,7 +25,7 @@ export default class AddStaff extends Command {
 
     const user = await message.guild.members.fetch(message.author.id)
     if (!user) return
-    if (!user.hasPermission('ADMINISTRATOR') && !client.config.owner.includes(user.id)) {
+    if (!user.permissions.has(PermissionFlagsBits.Administrator) && !client.config.owner.includes(user.id)) {
       return message.reply('hanya ADMIN yang bisa mengeksekusi perintah ini.')
     }
 
@@ -34,29 +34,26 @@ export default class AddStaff extends Command {
 
     // Nambah data
     if (mode === 'add') {
-      MStaffList
-        .findOne({ where: { serverID: message.guild.id, roleID: roleID } })
-        .then(async data => {
-          data
-            ? await data.update({ serverID: message.guild.id, roleID: roleID })
-            : await MStaffList.create({ serverID: message.guild.id, roleID: roleID })
-          await message.reply(`<@&${roleID}> berhasil ditambahkan!`)
-        })
-        .catch(err => {
-          message.reply(client.constant.errReason(err))
-        })
+      try {
+        const data = await MStaffList.findOne({ where: { serverID: message.guild.id, roleID: roleID } })
+        data
+          ? await data.update({ serverID: message.guild.id, roleID: roleID })
+          : await MStaffList.create({ serverID: message.guild.id, roleID: roleID })
+        await message.reply(`<@&${roleID}> berhasil ditambahkan!`)
+      } catch (error) {
+        message.reply(client.constant.errReason(error))
+      }
     }
     // Hapus data
     if (mode === 'remove') {
-      MStaffList.destroy({
-        where: { serverID: message.guild.id, roleID: roleID }
-      })
-        .then(() => {
-          message.reply(`<@&${roleID}> berhasil dihapus!`)
+      try {
+        await MStaffList.destroy({
+          where: { serverID: message.guild.id, roleID: roleID }
         })
-        .catch(err => {
-          message.reply(client.constant.errReason(err))
-        })
+        await message.reply(`<@&${roleID}> berhasil dihapus!`)
+      } catch (error) {
+        message.reply(client.constant.errReason(error))
+      }
     }
   }
 }

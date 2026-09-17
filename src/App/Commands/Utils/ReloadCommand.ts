@@ -46,7 +46,8 @@ export default class ReloadCommand extends Command {
       await message.reply(`command **"${cmd}"** successfully reloaded!`)
     } catch (error) {
       console.error(error)
-      message.reply(`there was something wrong when reloading "${cmd}" command.\n\`\`\`${error.message}\`\`\``)
+      const errMsg = error instanceof Error ? error.message : String(error)
+      message.reply(`there was something wrong when reloading "${cmd}" command.\n\`\`\`${errMsg}\`\`\``)
     }
   }
 }

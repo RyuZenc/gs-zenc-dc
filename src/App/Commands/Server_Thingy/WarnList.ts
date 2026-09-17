@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Moment from 'moment'
@@ -28,11 +28,11 @@ export default class WarnList extends Command {
       where: { serverID: message.guild.id, memberID: member.id }
     })
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor(client.config.botColor)
       .setTimestamp()
-      .setFooter(`Diminta oleh ${message.author.tag}`, message.author.displayAvatarURL())
-      .setTitle(`Daftar Warn untuk ${member.user.tag}`)
+      .setFooter({ text: `Diminta oleh ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
+      .setTitle(`Daftar Warn untuk ${member.user.username}`)
 
     let warnStr = ''
     let count = 1
@@ -49,9 +49,11 @@ export default class WarnList extends Command {
     })
 
     embed
-      .addField('Warn/Pelanggaran', warnStr.length === 0 ? 'Masih kosong' : warnStr)
-      .addField('Badword', bwStr.length === 0 ? 'Masih kosong' : bwStr)
+      .addFields([
+        { name: 'Warn/Pelanggaran', value: warnStr.length === 0 ? 'Masih kosong' : warnStr, inline: false },
+        { name: 'Badword', value: bwStr.length === 0 ? 'Masih kosong' : bwStr, inline: false }
+      ])
 
-    await message.channel.send(`<@!${message.author.id}>`, { embed })
+    await (message.channel as TextChannel).send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

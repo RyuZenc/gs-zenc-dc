@@ -1,7 +1,7 @@
-import { Collection } from 'discord.js'
-import { Moment } from 'moment'
-import moment from 'moment'
-import BadwordClass from './Module/Moderation/Badword'
+import { Collection } from "discord.js";
+import { Moment } from "moment";
+import moment from "moment";
+import BadwordClass from "./Module/Moderation/Badword";
 
 /**
  * You can use this state to store your global variable to your bot
@@ -12,7 +12,7 @@ export default {
    * Uptime saat bot ini pertama kali dinyalakan
    */
   uptime: moment(),
-  
+
   /**
    * Menjelaskan status presence secara global.
    */
@@ -23,8 +23,9 @@ export default {
       "Daddy! -w-",
       "Not a bot, but a robot.",
       "Watching you all",
-      "Love you all!! (●♡∀♡)"
-    ]
+      "Love you all!! (●♡∀♡)",
+      "Hehehe~",
+    ],
   },
 
   /**
@@ -42,10 +43,13 @@ export default {
   /**
    * Badword module di sini
    */
-  badword: new Collection<string, {
-    immune: string[],
-    list: BadwordClass
-  }>(),
+  badword: new Collection<
+    string,
+    {
+      immune: string[];
+      list: BadwordClass;
+    }
+  >(),
 
   /**
    * Register role di sini
@@ -57,14 +61,14 @@ export default {
    */
   gesper: {
     /** Penanggung jawab acara */
-    personInCharge: '',
-    serverID: '',
-    channelID: '',
-    eventName: '',
+    personInCharge: "",
+    serverID: "",
+    channelID: "",
+    eventName: "",
     uniqueMember: [],
     host: [],
     guest: [],
     started: false,
-    whenStarted: moment()
-  }
-}
+    whenStarted: moment(),
+  },
+};

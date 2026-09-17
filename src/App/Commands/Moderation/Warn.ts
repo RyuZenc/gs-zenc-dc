@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Moment from 'moment'
@@ -28,7 +28,7 @@ export default class Warn extends Command {
 
     const ifStaff = await IfStaff(momod)
     if (!ifStaff) {
-      if (!momod.hasPermission('ADMINISTRATOR')) {
+      if (!momod.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
@@ -36,6 +36,7 @@ export default class Warn extends Command {
     // Ambil role mute
     const muteRole = message.guild.roles.cache.filter(r => r.name === 'Muted').first()
     if (!muteRole) return message.reply('tidak ada role yang bernama **Muted**.')
+    const channel = message.channel as TextChannel
 
     // Dapatkan list
     const warnList = await MWarnList.findAll({ where: { serverID: member.guild.id, memberID: member.id } })
@@ -43,7 +44,7 @@ export default class Warn extends Command {
     let res = `<@!${member.id}> berhasil diwarn dengan alasan:\n\`\`\`${rlReason}\`\`\``
 
     // Selain staff, anda tidak mendapatkan warn apapun itu
-    if (!await IfStaff(member) && !member.hasPermission('ADMINISTRATOR')) {
+    if (!await IfStaff(member) && !member.permissions.has(PermissionFlagsBits.Administrator)) {
       res = `<@!${member.id}> berhasil diwarn untuk ke-${counting} dengan alasan:\n\`\`\`${rlReason}\`\`\``
       await MWarnList.create({
         serverID: member.guild.id,
@@ -57,59 +58,50 @@ export default class Warn extends Command {
         // Mute 3 jam
         case 3:
           setTempMute(client, member, muteRole, '3h', rlReason).then(victim => {
-              message.channel.send(`3x Warn berlalu. <@!${member.id}> berhasil dibungkam selama ${victim.intTime} ${victim.prettyTime}.`)
+              channel.send(`3x Warn berlalu. <@!${member.id}> berhasil dibungkam selama ${victim.intTime} ${victim.prettyTime}.`)
             })
           break
         // Mute 1 hari
         case 4:
           setTempMute(client, member, muteRole, '1d', rlReason).then(victim => {
-              message.channel.send(`4x Warn berlalu. <@!${member.id}> berhasil dibungkam selama ${victim.intTime} ${victim.prettyTime}.`)
+              channel.send(`4x Warn berlalu. <@!${member.id}> berhasil dibungkam selama ${victim.intTime} ${victim.prettyTime}.`)
             })
           break
         // Kick
         case 5:
-          await member.createDM()
-            .then(memberCH => {
-              memberCH.send(`Anda telah ditendang dari ${message.guild.name} dikarenakan 5x Warn berlalu dengan alasan:\n\`\`\`${reason}\`\`\``)
-            })
+          await member.send(`Anda telah ditendang dari ${message.guild.name} dikarenakan 5x Warn berlalu dengan alasan:\n\`\`\`${reason}\`\`\``)
             .catch(_err => {
               // Do fucking nothing
             })
-          await member.kick(`${rlReason} | ${message.author.tag}`)
+          await member.kick(`${rlReason} | ${message.author.username}`)
             .then(_mem => {
-              message.channel.send(`5x Warn berlalu. <@!${member.id}> berhasil ditendang!`)
+              channel.send(`5x Warn berlalu. <@!${member.id}> berhasil ditendang!`)
             })
           break
         // Ban, masih banding
         case 7:
-          await member.createDM()
-            .then(memberCH => {
-              memberCH.send(
+          await member.send(
                 `Anda telah dipalu dari ${message.guild.name} dikarenakan 7x Warn berlalu dengan alasan:\n\`\`\`${reason}\`\`\`\nKamu bisa memberi banding kepada staff yang memalu dirimu.`
               )
-            })
             .catch(_err => {
               // Do fucking nothing
             })
-          await member.ban({ reason: `${rlReason} | ${message.author.tag}` })
+          await member.ban({ reason: `${rlReason} | ${message.author.username}` })
             .then(() => {
-              message.channel.send(`7x Warn berlalu. <@!${member.id}> berhasil dipalu! Masih bisa banding kok!`)
+              channel.send(`7x Warn berlalu. <@!${member.id}> berhasil dipalu! Masih bisa banding kok!`)
             })
           break
         // Ban perm
         case 9:
-          await member.createDM()
-            .then(memberCH => {
-              memberCH.send(
+          await member.send(
                 `Anda telah dipalu permanen dari ${message.guild.name} dikarenakan 9x Warn berlalu dengan alasan:\n\`\`\`${reason}\`\`\`\n`
               )
-            })
             .catch(_err => {
               // Do fucking nothing
             })
-          await member.ban({ reason: `${rlReason} | ${message.author.tag}` })
+          await member.ban({ reason: `${rlReason} | ${message.author.username}` })
             .then(() => {
-              message.channel.send(`9x Warn berlalu. <@!${member.id}> berhasil dipalu dengan permanen!`)
+              channel.send(`9x Warn berlalu. <@!${member.id}> berhasil dipalu dengan permanen!`)
             })
           break
       }

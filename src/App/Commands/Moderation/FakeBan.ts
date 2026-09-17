@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { ifStaff as IfStaff } from '../../Module/Moderation/StaffList'
@@ -25,14 +25,14 @@ export default class FakeBan extends Command {
 
     const ifStaff = await IfStaff(momod)
     if (!ifStaff) {
-      if (!momod.hasPermission('ADMINISTRATOR')) {
+      if (!momod.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
 
     await message.reply(`member tersebut berhasil dipalu dengan alasan:\n\`\`\`${rlReason}\`\`\``)
     setTimeout(() => {
-      message.channel.send('Tapi boong.')
+      (message.channel as TextChannel).send('Tapi boong.')
     }, 3000);
   }
 }

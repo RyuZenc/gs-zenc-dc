@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Axios from 'axios'
@@ -18,10 +18,10 @@ export default class BotInfo extends Command {
     const data = pkgs.data
     const uptime = Moment().diff(client.state.uptime)
     
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor(client.config.botColor)
       .setTimestamp()
-      .setFooter('https://github.com/skymunn/gsp-bot', client.user.displayAvatarURL())
+      .setFooter({ text: 'https://github.com/skymunn/gsp-bot', iconURL: client.user.displayAvatarURL() })
       .setThumbnail(client.user.displayAvatarURL())
       .setTitle(`Statistik ${client.config.botName}`)
 
@@ -53,6 +53,7 @@ export default class BotInfo extends Command {
         }
       ])
 
-    message.channel.send(`<@!${message.author.id}>`, { embed })
+    const channel = message.channel as TextChannel
+    channel.send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

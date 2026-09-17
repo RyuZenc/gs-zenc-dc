@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import MWarnList from '../../Models/WarnList'
@@ -23,26 +23,25 @@ export default class WarnDelete extends Command {
 
     const ifStaff = await IfStaff(momod)
     if (!ifStaff) {
-      if (!momod.hasPermission('ADMINISTRATOR')) {
+      if (!momod.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
 
-    MWarnList.destroy({
-      where: {
-        serverID: member.guild.id,
-        memberID: member.id
-      }
-    })
-      .then(data => {
-        if (data) {
-          message.reply(`warn untuk <@!${member.id}> berhasil dihapus!`)
-        } else {
-          message.reply(`warn untuk <@!${member.id}> masih kosong!`)
+    try {
+      const data = await MWarnList.destroy({
+        where: {
+          serverID: member.guild.id,
+          memberID: member.id
         }
       })
-      .catch(err => {
-        message.reply(client.constant.errReason(err))
-      })
+      await message.reply(
+        data
+          ? `warn untuk <@!${member.id}> berhasil dihapus!`
+          : `warn untuk <@!${member.id}> masih kosong!`
+      )
+    } catch (error) {
+      message.reply(client.constant.errReason(error))
+    }
   }
 }

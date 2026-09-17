@@ -1,14 +1,17 @@
-import { Message } from 'discord.js'
+import { Message, ChannelType } from 'discord.js'
 import Client from '../Client'
 import Events from '../Events'
 import Cooldown from '../Module/Command/Cooldown'
 
 export default class CommandInvoker extends Events {
   constructor() {
-    super('message')
+    super('messageCreate')
   }
 
   public async run(client: Client, message: Message): Promise<any> {
+    if (!message.guild) return
+    if (message.channel.type !== ChannelType.GuildText) return
+
     const content = message.content
     const args = content.split(' ')
     const cmdName = args[0].substring(client.config.botPrefix.length)
@@ -41,7 +44,7 @@ export default class CommandInvoker extends Events {
       message.reply('something wrong with server. Try again later.')
     } finally {
       console.log(
-        `${message.author.tag} [${message.author.id}] executing "${commandName}" in <${message.guild.name}|${message.channel.id}> server.`
+        `${message.author.username} [${message.author.id}] executing "${commandName}" in <${message.guild.name}|${message.channel.id}> server.`
       )
     }
   }

@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 
@@ -20,6 +20,7 @@ export default class Avatar extends Command {
     const member = message.guild.members.cache.get(user.id)
     if (!member) return message.reply('member tidak ditemukan!')
 
-    message.channel.send(`Link: ${member.user.displayAvatarURL({ format: 'png' })}`)
+    const channel = message.channel as TextChannel
+    channel.send(`Link: ${member.user.displayAvatarURL({ extension: 'png' })}`)
   }
 }

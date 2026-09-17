@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, ActivityType } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 
@@ -23,10 +23,10 @@ export default class SetGamePresence extends Command {
     } else {
       client.state.presence.status = false
       client.user.setPresence({
-        activity: {
+        activities: [{
           name: msg,
-          type: 'PLAYING'
-        }
+          type: ActivityType.Playing
+        }]
       })
       message.reply('presence has been successfully set!')
     }

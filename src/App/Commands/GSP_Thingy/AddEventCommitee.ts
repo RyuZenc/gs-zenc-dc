@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, PermissionFlagsBits } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { ifStaff as IfStaff } from '../../Module/Moderation/StaffList'
@@ -24,7 +24,7 @@ export default class AddEventCommitee extends Command {
 
     const ifStaff = await IfStaff(executor)
     if (!ifStaff) {
-      if (!executor.hasPermission('ADMINISTRATOR')) {
+      if (!executor.permissions.has(PermissionFlagsBits.Administrator)) {
         return message.reply('anda tidak memiliki ijin untuk menggunakan command ini!')
       }
     }
@@ -33,28 +33,25 @@ export default class AddEventCommitee extends Command {
     if (!role) return message.reply('role tidak ditemukan!')
 
     if (mode === 'add') {
-      MEvtCom
-        .findOne({ where: { serverID: message.guild.id, roleID: roleID } })
-        .then(async data => {
-          data
-            ? await data.update({ serverID: message.guild.id, roleID: roleID })
-            : await MEvtCom.create({ serverID: message.guild.id, roleID: roleID })
-          await message.reply(`<@&${roleID}> berhasil ditambahkan!`)
-        })
-        .catch(err => {
-          message.reply(client.constant.errReason(err))
-        })
+      try {
+        const data = await MEvtCom.findOne({ where: { serverID: message.guild.id, roleID: roleID } })
+        data
+          ? await data.update({ serverID: message.guild.id, roleID: roleID })
+          : await MEvtCom.create({ serverID: message.guild.id, roleID: roleID })
+        await message.reply(`<@&${roleID}> berhasil ditambahkan!`)
+      } catch (error) {
+        message.reply(client.constant.errReason(error))
+      }
     }
     if (mode === 'remove') {
-      MEvtCom.destroy({
-        where: { serverID: message.guild.id, roleID: roleID }
-      })
-        .then(() => {
-          message.reply(`<@&${roleID}> berhasil dihapus!`)
+      try {
+        await MEvtCom.destroy({
+          where: { serverID: message.guild.id, roleID: roleID }
         })
-        .catch(err => {
-          message.reply(client.constant.errReason(err))
-        })
+        await message.reply(`<@&${roleID}> berhasil dihapus!`)
+      } catch (error) {
+        message.reply(client.constant.errReason(error))
+      }
     }
   }
 }

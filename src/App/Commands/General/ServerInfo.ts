@@ -1,4 +1,4 @@
-import { Message, MessageEmbed, VerificationLevel } from 'discord.js'
+import { Message, EmbedBuilder, GuildVerificationLevel, ChannelType, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Moment from 'moment'
@@ -11,22 +11,22 @@ export default class ServerInfo extends Command {
     })
   }
 
-  private verificationLevel(guild: VerificationLevel): string {
+  private verificationLevel(guild: GuildVerificationLevel): string {
     let ret = ''
     switch (guild) {
-      case 'NONE':
+      case GuildVerificationLevel.None:
         ret = 'Tidak ada verifikasi.'
         break
-      case 'LOW':
+      case GuildVerificationLevel.Low:
         ret = 'Rendah (Verifikasi email Discord).'
         break
-      case 'MEDIUM':
+      case GuildVerificationLevel.Medium:
         ret = 'Menengah (Terdaftar di Discord selama 5 menit).'
         break
-      case 'HIGH':
+      case GuildVerificationLevel.High:
         ret = 'Tinggi (Menjadi member server selama 10 menit).'
         break
-      case 'VERY_HIGH':
+      case GuildVerificationLevel.VeryHigh:
         ret = 'Sangat Tinggi (Harus verifikasi nomor telepon di Discord).'
         break
     }
@@ -36,10 +36,10 @@ export default class ServerInfo extends Command {
   public async run(client: Client, message: Message, _args: string[]): Promise<any> {
     const guild = message.guild
     
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor(client.config.botColor)
       .setTimestamp()
-      .setFooter(`Direquest oleh ${message.author.tag}`, client.user.displayAvatarURL())
+      .setFooter({ text: `Direquest oleh ${message.author.username}`, iconURL: client.user.displayAvatarURL() })
       .setThumbnail(guild.iconURL())
       .setTitle(`[${guild.nameAcronym}] ${guild.name}`)
 
@@ -51,7 +51,7 @@ export default class ServerInfo extends Command {
         },
         {
           name: 'Lokasi',
-          value: guild.region,
+          value: guild.preferredLocale,
           inline: true
         },
         {
@@ -61,14 +61,14 @@ export default class ServerInfo extends Command {
         },
         {
           name: `Kanal [${guild.channels.cache.size}]`,
-          value: `${guild.channels.cache.filter(g => g.type === 'category').size} Kategori\n` +
-            `${guild.channels.cache.filter(g => g.type === 'text').size} Kanal Teks\n` +
-            `${guild.channels.cache.filter(g => g.type === 'voice').size} Kanal Suara`,
+          value: `${guild.channels.cache.filter(g => g.type === ChannelType.GuildCategory).size} Kategori\n` +
+            `${guild.channels.cache.filter(g => g.type === ChannelType.GuildText).size} Kanal Teks\n` +
+            `${guild.channels.cache.filter(g => g.type === ChannelType.GuildVoice).size} Kanal Suara`,
           inline: true
         },
         {
           name: `Pemilik Server`,
-          value: `<@!${guild.ownerID}>`,
+          value: `<@!${guild.ownerId}>`,
           inline: true
         },
         {
@@ -78,6 +78,7 @@ export default class ServerInfo extends Command {
         }
       ])
 
-    message.channel.send(`<@!${message.author.id}>`, { embed })
+    const channel = message.channel as TextChannel
+    channel.send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

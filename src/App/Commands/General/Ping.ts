@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, TextChannel, EmbedBuilder } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { checkConnection } from '../../Models/_Connection'
@@ -17,15 +17,24 @@ export default class Ping extends Command {
     return Date.now() - now
   }
 
+  private embed(client: Client, description: string): EmbedBuilder {
+    return new EmbedBuilder()
+      .setColor(client.config.botColor)
+      .setDescription(description)
+  }
+
   public async run(client: Client, message: Message, _args: string[]): Promise<any> {
     const now = Date.now()
-    message.channel.send(':ping_pong: Tunggu sebentar...')
+    const channel = message.channel as TextChannel
+    channel.send({ embeds: [this.embed(client, ':ping_pong: Tunggu sebentar...')] })
       .then(async message => {
         if (!message) return
         const diff = Date.now() - now
-        await message.edit(
-          `:ping_pong: Pong!\nLatency: ${diff} ms\nWebSocket: ${client.ws.ping} ms\nDatabase: ${await this.getDatabaseLatency()} ms`
-        )
+        await message.edit({
+          embeds: [
+            this.embed(client, `:ping_pong: Pong!\nLatency: ${diff} ms\nWebSocket: ${client.ws.ping} ms\nDatabase: ${await this.getDatabaseLatency()} ms`)
+          ]
+        })
       })
   }
 }

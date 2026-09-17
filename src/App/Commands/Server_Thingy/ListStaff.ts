@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import MStaffList from '../../Models/StaffList'
@@ -22,13 +22,13 @@ export default class ListStaff extends Command {
       count++
     })
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor(client.config.botColor)
       .setTitle('Daftar Role Staff')
-      .setFooter(`Diminta oleh ${message.author.tag}`, message.author.displayAvatarURL())
+      .setFooter({ text: `Diminta oleh ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
       .setTimestamp()
       .setDescription(returningData.length > 0 ? returningData.join('\n') : 'Tidak ada role.')
 
-    await message.channel.send(`<@!${message.author.id}>`, { embed: embed })
+    await (message.channel as TextChannel).send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

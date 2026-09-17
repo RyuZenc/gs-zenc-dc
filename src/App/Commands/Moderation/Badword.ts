@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, PermissionFlagsBits, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import { GetStaffList } from '../../Module/Moderation/StaffList'
@@ -21,14 +21,14 @@ export default class Badword extends Command {
 
   public async run(client: Client, message: Message, args: string[]): Promise<any> {
     const executor = await message.guild.members.fetch(message.author.id)
-    if (!executor) return
-    if (!executor.hasPermission('ADMINISTRATOR') && !client.config.owner.includes(executor.id)) {
+    if (!executor) return message.reply('gagal mengambil data member anda.')
+    if (!executor.permissions.has(PermissionFlagsBits.Administrator) && !client.config.owner.includes(executor.id)) {
       return message.reply('hanya ADMIN yang bisa mengeksekusi perintah ini.')
     }
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setColor(client.config.botColor)
-      .setFooter(`Diminta oleh ${message.author.tag}`, message.author.displayAvatarURL())
+      .setFooter({ text: `Diminta oleh ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
       .setTimestamp()
 
     const toggle = args[0] as 'modify' | 'immune'
@@ -116,6 +116,6 @@ export default class Badword extends Command {
       }
     }
 
-    await message.channel.send(`<@!${message.author.id}>`, { embed })
+    await (message.channel as TextChannel).send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }

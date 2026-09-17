@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, ChannelType, PermissionFlagsBits } from 'discord.js'
 import Client from '../Client'
 import Events from '../Events'
 import Moment from 'moment'
@@ -8,11 +8,11 @@ import { setTempMute } from '../Module/Moderation/TempMute'
 
 export default class ModerationBadword extends Events {
   constructor() {
-    super('message')
+    super('messageCreate')
   }
 
   public async run(client: Client, message: Message): Promise<any> {
-    if (message.channel.type !== 'text') return
+    if (message.channel.type !== ChannelType.GuildText) return
     if (message.author.bot) return
 
     if (message.author.id === client.user.id) return
@@ -27,7 +27,7 @@ export default class ModerationBadword extends Events {
       if (executor.roles.cache.has(se)) ifImmune = true
     })
     if (ifImmune) return
-    if (executor.permissions.has('ADMINISTRATOR')) return
+    if (executor.permissions.has(PermissionFlagsBits.Administrator)) return
 
     // Staff Bypass
     if (await ifStaff(executor)) return

@@ -5,7 +5,7 @@ import { checkConnection } from '../Models/_Connection'
 
 export default class DatabaseCheckConnection extends Events {
   constructor() {
-    super('ready')
+    super('clientReady')
   }
 
   public async run(_client: Client, _message: Message): Promise<any> {

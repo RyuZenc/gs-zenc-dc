@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, ChannelType, PermissionFlagsBits } from 'discord.js'
 import Client from '../Client'
 import Events from '../Events'
 import { setTempMute } from '../Module/Moderation/TempMute'
@@ -6,11 +6,11 @@ import { ifStaff } from '../Module/Moderation/StaffList'
 
 export default class ModerationAntiInvite extends Events {
   constructor() {
-    super('message')
+    super('messageCreate')
   }
 
   public async run(client: Client, message: Message): Promise<any> {
-    if (message.channel.type !== 'text') return
+    if (message.channel.type !== ChannelType.GuildText) return
     if (message.author.bot) return
 
     const executor = await message.guild.members.fetch(message.author.id)
@@ -23,7 +23,7 @@ export default class ModerationAntiInvite extends Events {
       if (executor.roles.cache.has(se)) ifImmune = true
     })
     if (ifImmune) return
-    if (executor.permissions.has('ADMINISTRATOR')) return
+    if (executor.permissions.has(PermissionFlagsBits.Administrator)) return
 
     // Staff Bypass
     if (await ifStaff(executor)) return

@@ -5,7 +5,7 @@ import Moment from 'moment'
 
 export default class ModerationCheckMute extends Events {
   constructor() {
-    super('ready')
+    super('clientReady')
   }
 
   public async run(client: Client): Promise<any> {

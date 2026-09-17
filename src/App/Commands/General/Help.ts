@@ -1,4 +1,4 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { Message, EmbedBuilder, TextChannel } from 'discord.js'
 import Command from '../../Command'
 import Client from '../../Client'
 import Moment from 'moment'
@@ -21,13 +21,13 @@ export default class Help extends Command {
     const cmd = client.command
     const help = client.help
 
-    const embed = new MessageEmbed()
+    const embed = new EmbedBuilder()
       .setTimestamp()
       .setColor(client.config.botColor)
-      .setFooter(
-        `(C) ${Moment().format('YYYY')} - ${client.config.botName} | Running ${cmd.size} command${cmd.size > 1 ? 's' : ''}`,
-        client.user.displayAvatarURL()
-      )
+      .setFooter({
+        text: `(C) ${Moment().format('YYYY')} - ${client.config.botName} | Running ${cmd.size} command${cmd.size > 1 ? 's' : ''}`,
+        iconURL: client.user.displayAvatarURL()
+      })
       .setThumbnail(client.user.displayAvatarURL())
 
     // Global help
@@ -45,7 +45,7 @@ export default class Help extends Command {
       help.forEach(category => {
         if (!category.module.hidden) {
           const cmdList = category.command.map(cate => cate.split(':')[1])
-          embed.addField(category.module.name, `\`${cmdList.join('` `')}\``)
+          embed.addFields([{ name: category.module.name, value: `\`${cmdList.join('` `')}\``, inline: false }])
         }
       })
     }
@@ -60,13 +60,16 @@ export default class Help extends Command {
         ? getCmd.options.name.slice(1)
         : []
       embed
-        .setAuthor(`Penggunaan Command ${client.config.botPrefix}${command}.`)
-        .addField('Deskripsi', getCmd.options.description)
-        .addField('Alias', args.length === 0 ? 'Tidak ada alias.' : `${client.config.botPrefix}${args.join(`, ${client.config.botPrefix}`)}`)
-        .addField('Penggunaan', `${client.config.botPrefix}${command}${typeof getCmd.options.args === 'undefined' ? '' : ` ${ArgsToString(getCmd.options.args)}`}`)
-        .addField('Contoh', `${client.config.botPrefix}${!getCmd.options.example ? command : getCmd.options.example}`)
+        .setAuthor({ name: `Penggunaan Command ${client.config.botPrefix}${command}.` })
+        .addFields([
+          { name: 'Deskripsi', value: getCmd.options.description, inline: false },
+          { name: 'Alias', value: args.length === 0 ? 'Tidak ada alias.' : `${client.config.botPrefix}${args.join(`, ${client.config.botPrefix}`)}`, inline: false },
+          { name: 'Penggunaan', value: `${client.config.botPrefix}${command}${typeof getCmd.options.args === 'undefined' ? '' : ` ${ArgsToString(getCmd.options.args)}`}`, inline: false },
+          { name: 'Contoh', value: `${client.config.botPrefix}${!getCmd.options.example ? command : getCmd.options.example}`, inline: false }
+        ])
     }
 
-    message.channel.send(`<@!${message.author.id}>`, { embed: embed })
+    const channel = message.channel as TextChannel
+    channel.send({ content: `<@!${message.author.id}>`, embeds: [embed] })
   }
 }
