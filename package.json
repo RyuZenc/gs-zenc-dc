@@ -44,7 +44,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "start": "node ./build/src/index.js",
+    "start": "node ./build/src/Index.js",
+    "start:prod": "npm run build && npm run migrate:up && node ./build/src/Index.js",
     "migrate:up": "node ./Database/migrations.js up",
     "migrate:down": "node ./Database/migrations.js down"
   },
