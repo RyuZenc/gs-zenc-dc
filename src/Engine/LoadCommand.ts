@@ -28,7 +28,7 @@ export default (client: Client): void => {
           const extName = command.split('.').pop()
           if (extName !== 'js') return
 
-          const _cmd = await import(Path.join(__dirname, `../App/Commands/${category}/${command}`))
+          const _cmd = await require(Path.join(__dirname, `../App/Commands/${category}/${command}`))
           const cmd = new _cmd.default() as Command
           
           const commandName = typeof cmd.options.name !== 'string' ? cmd.options.name[0] : cmd.options.name

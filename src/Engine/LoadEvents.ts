@@ -11,7 +11,7 @@ export default (client: Client): void => {
       const extName = event.split('.').pop()
       if (extName !== 'js') return
 
-      const _evt = await import(Path.join(__dirname, `../App/Events/${event}`))
+      const _evt = await require(Path.join(__dirname, `../App/Events/${event}`))
       const evt = new _evt.default() as Events
 
       client.on(evt.events as any, (...args: any) => {
